@@ -1,5 +1,9 @@
 const solutionBoard = [1, 2, 3, 4, 5, 6, 7, 8, 0];
-const initialBoard = [7, 4, 2, 8, 1, 5, 6, 3, 0];
+const boards = {
+  easy: [1, 2, 3, 4, 5, 6, 0, 7, 8],
+  medium: [7, 4, 2, 8, 1, 5, 6, 3, 0],
+  hard: [3, 5, 6, 0, 7, 4, 2, 1, 8],
+}
 
 const showBoard = (board) => {
   console.log(`[${board[0]}, ${board[1]}, ${board[2]}]`);
@@ -69,6 +73,8 @@ const searchNodes = (board) => {
 // Busca por custo uniforme. O custo é o tamanho do caminho percorrido para chegar até o nodo. 
 // Nodo inicial tem custo 0. Cada novo nodo acrescenta +1 no custo
 const uniformCost = (board) => {
+  console.log('Algoritmo: Custo uniforme \n\n')
+
   let visited = [];
   let open = [{ 
     board: board,
@@ -105,7 +111,6 @@ const uniformCost = (board) => {
 
   let currentState = board;
   
-  console.time('tempo-execucao');
   while (!isFinalState(currentState, solutionBoard)) {
     open = open.sort((a, b) => a.cost - b.cost); // ordena a lista a partir do 'cost', do MENOR pro MAIOR
     const current = open[0]; // pega o nodo com menor custo
@@ -116,11 +121,11 @@ const uniformCost = (board) => {
     open = open.filter(node => node !== current); // remove o 'current' da lista de nodos abertos
     visited.push(current); // adiciona o current na lista de nodos visitados
   }
-  console.timeEnd('tempo-execucao');
 
-  console.log(visited);
-  console.log(open);
-  console.log('Fim de jogo!');
+  return {
+    openNodes: open,
+    visitedNodes: visited,
+  };
 };
 
 //funções de cálculos de score para as heurísticas:
@@ -177,6 +182,8 @@ const calculateManhatanScore = (board) => {  // função para calcular o 'score'
 };
 
 const positionAStar = (initialBoard) => {
+  console.log('Algoritmo: A* por posição \n\n')
+
   let visited = [];
   let open = [{
     board: initialBoard,
@@ -201,7 +208,6 @@ const positionAStar = (initialBoard) => {
 
   let currentState = initialBoard;
 
-  console.time('tempo-execucao');
   while (!isFinalState(currentState, solutionBoard)) {
     open = open.sort((a, b) => a.score - b.score); // ordena a lista a partir do 'score', do MENOR pro MAIOR
     const current = open[0];
@@ -214,14 +220,16 @@ const positionAStar = (initialBoard) => {
     open = open.filter(node => node !== current); // remove o 'current' da lista de nodos abertos
     visited.push(current); // adiciona o current na lista de nodos visitados
   }
-  console.timeEnd('tempo-execucao');
 
-  console.log(visited);
-  console.log(open);
-  console.log('Fim de jogo!');
+  return {
+    openNodes: open,
+    visitedNodes: visited,
+  };
 };
 
 const manhatanAStar = (initialBoard) => {
+  console.log('Algoritmo: A* Manhatan \n\n')
+
   let visited = [];
   let open = [{
     board: initialBoard,
@@ -246,7 +254,6 @@ const manhatanAStar = (initialBoard) => {
 
   let currentState = initialBoard;
 
-  console.time('tempo-execucao');
   while (!isFinalState(currentState, solutionBoard)) {
     open = open.sort((a, b) => a.score - b.score); // ordena a lista a partir do 'score', do MAIOR pro MENOR
     const current = open[0];
@@ -259,14 +266,15 @@ const manhatanAStar = (initialBoard) => {
     open = open.filter(node => node !== current); // remove o 'current' da lista de nodos abertos
     visited.push(current); // adiciona o current na lista de nodos visitados
   }
-  console.timeEnd('tempo-execucao');
-
-  console.log(visited);
-  console.log(open);
-  console.log('Fim de jogo!');
+  
+  return {
+    openNodes: open,
+    visitedNodes: visited,
+  };
 };
 
 const hardAStar = (initialBoard) => {
+  console.log('Algoritmo: A* completo \n\n')
   const calculateHardScore = (board, cost = 0) => {
     const score = calculateManhatanScore(board) + cost
     return score;
@@ -308,7 +316,6 @@ const hardAStar = (initialBoard) => {
 
   let currentState = initialBoard;
 
-  console.time('tempo-execucao');
   while (!isFinalState(currentState, solutionBoard)) {
     open = open.sort((a, b) => a.score - b.score); // ordena a lista a partir do 'score', do MENOR pro MAIOR
     const current = open[0];
@@ -321,18 +328,28 @@ const hardAStar = (initialBoard) => {
     open = open.filter(node => node !== current); // remove o 'current' da lista de nodos abertos
     visited.push(current); // adiciona o current na lista de nodos visitados
   }
-  console.timeEnd('tempo-execucao');
 
-  console.log('Nodos visitados:', visited);
-  console.log('Nodos abertos: ', open);
-  console.log('')
-  console.log('Tabuleiro inicial:')
-  showBoard(initialBoard);
-  console.log('')
-  console.log('Tabuleiro final:')
-  showBoard(solutionBoard);
-  console.log('')
-  console.log('Fim de jogo!');
+  return {
+    openNodes: open,
+    visitedNodes: visited,
+  };
 };
 
-hardAStar(initialBoard);
+const initialBoard = boards.easy;
+
+console.time('tempo-execucao');
+// const { openNodes, visitedNodes } = uniformCost(initialBoard);
+// const { openNodes, visitedNodes } = positionAStar(initialBoard);
+// const { openNodes, visitedNodes } = manhatanAStar(initialBoard);
+const { openNodes, visitedNodes } = hardAStar(initialBoard);
+console.timeEnd('tempo-execucao');
+console.log('')
+
+console.log('Nodos visitados:', visitedNodes);
+console.log('Nodos abertos: ', openNodes);
+console.log('\nNodo final:', visitedNodes[visitedNodes.length - 1]);
+console.log('\nTabuleiro inicial:')
+showBoard(initialBoard);
+console.log('\nTabuleiro final:')
+showBoard(solutionBoard);
+console.log('\nFim de jogo!');
